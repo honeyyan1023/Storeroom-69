@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Room Management System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
+        .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 10px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-save { background-color: #28a745; }
+        .btn-reset { background-color: #dc3545; }
+        .photo-box { margin-top: 15px; width: 150px; height: 150px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; background: #fafafa; }
+        .photo-box img { max-width: 100%; max-height: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Store Room Management System</h2>
+    
+    <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="dateField">
+    </div>
+
+    <div class="form-group">
+        <label>Item Code (E8)</label>
+        <input type="text" id="itemCode" placeholder="Enter code..." oninput="handleItemCodeChange()">
+    </div>
+
+    <div class="photo-box" id="photoContainer">
+        <span id="photoPlaceholder">No Image</span>
+    </div>
+
+    <div class="form-group" style="margin-top:15px;">
+        <label>Transaction Type (G20)</label>
+        <select id="transactionType">
+            <option value="">-- Select --</option>
+            <option value="In">In</option>
+            <option value="Out">Out</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="quantity" min="1" value="1">
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-save" onclick="saveData()">Save</button>
+        <button class="btn-reset" onclick="resetForm()">Reset</button>
+    </div>
+</div>
+
+<script>
+    // Mock database matching your PhotoList logic
+    const itemDatabase = {
+        "A101": { photo: "https://via.placeholder.com/150/0056b3/fff?text=Item+A101" },
+        "B202": { photo: "https://via.placeholder.com/150/28a745/fff?text=Item+B202" }
+    };
+
+    // Set initial date automatically (Excel E4 macro)
+    document.getElementById('dateField').valueAsDate = new Date();
+
+    // Excel Worksheet_Change logic for photo display
+    function handleItemCodeChange() {
+        const code = document.getElementById('itemCode').value.trim();
+        const container = document.getElementById('photoContainer');
+        
+        if (itemDatabase[code]) {
+            container.innerHTML = `<img src="${itemDatabase[code].photo}" alt="Item Photo">`;
+        } else {
+            container.innerHTML = `<span id="photoPlaceholder">No Image</span>`;
+        }
+    }
+
+    // Excel Save Macro logic
+    function saveData() {
+        const record = {
+            date: document.getElementById('dateField').value,
+            code: document.getElementById('itemCode').value,
+            type: document.getElementById('transactionType').value,
+            qty: document.getElementById('quantity').value
+        };
+
+        if (!record.code || !record.type) {
+            alert("Please fill in the Item Code and Transaction Type.");
+            return;
+        }
+
+        // Save to browser storage (Local Record List)
+        let history = JSON.parse(localStorage.getItem('inventoryHistory')) || [];
+        history.push(record);
+        localStorage.setItem('inventoryHistory', JSON.stringify(history));
+
+        alert("Record Saved Successfully!");
+        resetForm();
+    }
+
+    // Excel Reset Macro logic
+    function resetForm() {
+        document.getElementById('dateField').valueAsDate = new Date();
+        document.getElementById('itemCode').value = '';
+        document.getElementById('transactionType').value = '';
+        document.getElementById('quantity').value = 1;
+        document.getElementById('photoContainer').innerHTML = `<span id="photoPlaceholder">No Image</span>`;
+    }
+</script>
+
+</body>
+</html>
